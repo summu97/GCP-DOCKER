@@ -1,0 +1,4 @@
+sudo apt install docker.io -y
+docker -v
+
+NOTE: make sure to work as sudo user.
