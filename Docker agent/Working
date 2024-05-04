@@ -20,7 +20,11 @@ NOTE: Need to Allow these port ranges.
 * docker images(you can see image created)
 
 *Push docker image to docker registry:
-or use: 'summu97/agent:v1'
+docker login
+username: give it.
+password: give it.
+docker tag YOUR_IMAGE USERNAME/REPO_NAME
+docker push USERNAME/REPO_NAME
 ------------------
 Jenkins integration:
 plugin: Docker
