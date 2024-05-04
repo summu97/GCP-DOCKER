@@ -1,0 +1,63 @@
+* vim Dockerfile
+
+
+FROM ubuntu:18.04
+
+LABEL maintainer="Bibin Wilson <bibinwilsonn@gmail.com>"
+
+# Install apt-utils along with other necessary packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends apt-utils && \
+    apt-get install -qy git openssh-server openjdk-8-jdk maven && \
+    apt-get -qy autoremove && \
+    apt-get clean
+
+# Set up SSH server
+RUN sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
+    mkdir -p /var/run/sshd
+
+# Set password for jenkins user
+RUN useradd -m -d /home/jenkins -s /bin/bash jenkins && \
+    echo 'jenkins:password' | chpasswd
+
+# Copy authorized keys
+COPY .ssh/authorized_keys /home/jenkins/.ssh/authorized_keys
+
+# Set permissions
+RUN chown -R jenkins:jenkins /home/jenkins/.ssh/ && \
+    chmod 600 /home/jenkins/.ssh/authorized_keys
+
+# Standard SSH port
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
+
+* docker build -t image:v1 .
+* docker images
+
+---------------------
+sudo apt update -y
+sudo apt install docker.io -y
+docker -v
+
+vim /lib/systemd/system/docker.service
+Line:14 change to: ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
+sudo systemctl daemon-reload
+sudo service docker restart
+
+Checking connectivity:
+curl http://localhost:4243/version
+Also check this:
+curl http://54.221.134.7:4243/version
+
+***4243 is docker API port.
+
+*Build Docker image using Dockerfile:
+*Push docker image to docker registry:
+
+------------------
+Jenkins integration:
+plugin: Docker.
+Dashboard-->Manage Jenkins-->Clouds-->name-->Type(select Docker)-->Create-->Docker Cloud details-->Docker Host URI-->tcp://34.125.184.63:4243-->Test Connection-->(Version = 24.0.5, API Version = 1.43)-->Enabled(click it)-->Docker Agent templates-->Add Docker Template-->Labels-->docker-agent-->Enabled-->Name-->docker-agent-->Docker Image-->summu97/jd-agent:v1-->Registry Authentication(add it)-->Remote File System Root-->/home/jenkins-->Connect method-->Connect with SSH-->SSH key-->use configured SSH credentials-->SSH Credentials-->SSH Credentials(username and password = jenkins)-->Host Key Verification Strategy-->known host file verification strategy-->save.
+
+Validate by running job:
