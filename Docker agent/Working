@@ -13,8 +13,14 @@ curl http://54.221.134.7:4243/version
 NOTE: Need to Allow these port ranges.
 
 *Build Docker image using Dockerfile:
-*Push docker image to docker registry:
+* vim Dockerfile
+  Copy Paste code Dockerfile code.
 
+* docker build -t image:v1 .
+* docker images(you can see image created)
+
+*Push docker image to docker registry:
+or use: 'summu97/agent:v1'
 ------------------
 Jenkins integration:
 plugin: Docker
