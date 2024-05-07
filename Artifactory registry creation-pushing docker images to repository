@@ -1,0 +1,77 @@
+GUI method for creating repository:
+
+* Artifact Registry-->Create repository-->Name-->Format(Docker)-->Location type-->Clean Up Policy-->Add necessary things and create.
+* Open cloud shell or any terminal and create 'Dockerfile'
+
+---------------------------------
+To create repository in artifact registry:
+
+gcloud artifacts repositories create REPOSITORY_ID --location=LOCATION --repository-format=FORMAT --version-policy=VALUE --labels=key="value" --description="DESCRIPTION"
+
+Ex:
+gcloud artifacts repositories create my-docker-repo --location=us-central1 --repository-format=maven --labels=name="sumanth" --version-policy=release --description="My Docker Repository"
+-------
+version-policies:
+
+none, release, snapshot
+NOTE: version policies wont apply for docker.Dont know about other types.
+-------
+Location:
+
+regional: us-east1, us-central1....
+multi-region: us, asia......
+-------
+Formats:
+
+docker
+maven
+npm
+python
+apt
+yum...etc.
+
+
+To Delete repository:
+gcloud artifacts repositories delete REPOSITORY_ID --location=LOCATION
+
+Ex:
+gcloud artifacts repositories delete my-docker-repo --location=us-central1
+-------
+CREATING IMAGE AND PUSHING IMAGE TO REPOSITORY:
+
+Authenticating 'Artifact registry':
+* gcloud auth configure-docker us-east1-docker.pkg.dev
+
+Building image:
+*docker build -t region.docker.pkg.dev/project-id/repository_name/image_name:version .
+
+Ex:
+docker build -t us-east1-docker.pkg.dev/ringed-hallway-417305/sample/img:v1 .
+
+Conforming image creation:
+* docker images
+
+Pushing image to repository:
+*docker push region.docker.pkg.dev/project-id/repository_name/image_name:version
+
+Ex:
+docker push us-east1-docker.pkg.dev/ringed-hallway-417305/sample/img:v1
+
+NOTE: Here docker.pkg.dev is host name of artifact registry.
+
+-------
+To list all repositories:
+gcloud artifacts repositories list
+
+-------
+FOR KNOWLEDGE:
+
+Repository-type:
+standard, remote, virtual
+
+Standard Repository: Basic repository for storing your own artifacts directly.
+Remote Repository: Acts as a cache for artifacts from external sources, improving performance by storing copies locally.
+Virtual Repository: Combines artifacts from multiple repositories into one unified view, making it easier to access and manage them.
+
+
+
