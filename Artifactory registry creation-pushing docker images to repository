@@ -75,6 +75,115 @@ standard, remote, virtual
 Standard Repository: Basic repository for storing your own artifacts directly.
 Remote Repository: Acts as a cache for artifacts from external sources, improving performance by storing copies locally.
 Virtual Repository: Combines artifacts from multiple repositories into one unified view, making it easier to access and manage them.
+-------------------------------------------------------------------------
+Pull images: Artifact Registry Reader (roles/artifactregistry.reader)
+Tag and push images: Artifact Registry Writer (roles/artifactregistry.writer)
+
+
+Dockerfile:
+
+FROM pengbai/docker-supermario
+EXPOSE 8080
+
+Creating repository:
+gcloud artifacts repositories create my-docker-repo --location=us-central1 --repository-format=docker --labels=name="sumanth" --description="My Docker Repository"
+
+
+List repositories:
+gcloud artifacts repositories list
+
+Authenticating repository:
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+Building image:
+docker build -t us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/sumanth:v1 .
+
+Pushing to repository:
+docker push us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/sumanth:v1
+-------------
+List images in repositories:
+gcloud artifacts docker images list LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE 
+						(or)
+gcrane ls LOCATION-docker.pkg.dev/PROJECT/REPOSITORY
+
+Ex:
+gcloud artifacts docker images list us-central1-docker.pkg.dev/ringed-hallway-417305/practise/
+-------------
+Pulling image from registry:
+docker pull LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
+-------------
+DELETING UN-USED IMAGES:
+* The gcrane tool simplifies copying across repositories:
+
+*Run the following command to download gcrane:
+curl -L \
+https://github.com/google/go-containerregistry/releases/latest/download/go-containerregistry_Linux_x86_64.tar.gz \
+-o go-containerregistry.tar.gz
+
+*Run the following commands to make the gcrane command executable:
+tar -zxvf go-containerregistry.tar.gz
+chmod +x gcrane
+sudo mv gcrane /usr/local/bin/
+
+*To see the version:
+gcrane version
+
+IDENTIFYING IMAGES TO COPY:
+gcrane ls LOCATION-docker.pkg.dev/PROJECT/REPOSITORY
+
+Ex:
+gcrane ls us-east1-docker.pkg.dev/ringed-hallway-417305/practise
+
+* To list tags an image has, run the command:
+gcrane ls LOCATION-docker.pkg.dev/PROJECT/IMAGE
+
+* To list images recursively under a specific path, run the command:
+gcrane ls -r LOCATION-docker.pkg.dev/PROJECT/PATH
+
+-------------
+COPYING IMAGES BETWEEN REPOSITORIES:
+
+gcrane cp LOCATION1-docker.pkg.dev/PROJECT1/REPOSITORY1/IMAGE1 \
+LOCATION2-docker.pkg.dev/PROJECT2/REPOSITORY2/IMAGE2
+
+Ex:
+gcrane cp us-east1-docker.pkg.dev/ringed-hallway-417305/practise/sumo:sumo us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/chitti
+-------------
+TO COPY ALL IMAGES IN REPOSITORY:
+
+gcrane cp -r LOCATION1-docker.pkg.dev/PROJECT1/REPOSITORY1 \
+LOCATION2-docker.pkg.dev/PROJECT2/REPOSITORY2
+
+Ex:
+gcrane cp -r us-east1-docker.pkg.dev/ringed-hallway-417305/practise us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo
+-------------
+EXAMPLES:
+gcrane cp us-east1-docker.pkg.dev/my-project/repo1/my-image:tag1 \
+us-east1-docker.pkg.dev/my-project/repo2/my-image:tag1
+
+gcrane cp -r us-east1-docker.pkg.dev/my-project/repo1/test-images/testing \
+us-east1-docker.pkg.dev/my-project/repo2/test-images/testing
+
+gcrane cp -r us-east1-docker.pkg.dev/dev-project/my-repo \
+us-east1-docker.pkg.dev/prod-project/my-repo
+-------------
+PULLING IMAGE FROM REPOSITORY:
+docker pull us-east1-docker.pkg.dev/ringed-hallway-417305/practise/sumo:sumo
+-------------
+
+Prerequesites:
+*You have created the target Docker repository in Artifact Registry for the images you are copying.
+*You have the required permissions:
+Artifact Registry Reader (roles/storage.objectViewer) or a role with equivalent permissions for the repository you are copying from.
+Artifact Registry Writer (roles/artifactregistry.writer) or a role with equivalent permissions for the target repository.
+
+
+-------------
+A valid Docker repository has the format of
+  LOCATION-docker.DOMAIN/PROJECT-ID/REPOSITORY-ID
+
+A valid image has the format of
+  LOCATION-docker.DOMAIN/PROJECT-ID/REPOSITORY-ID/IMAGE
 
 
 
