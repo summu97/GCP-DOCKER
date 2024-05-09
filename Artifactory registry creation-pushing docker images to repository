@@ -1,3 +1,6 @@
+Pull images: Artifact Registry Reader (roles/artifactregistry.reader)
+Tag and push images: Artifact Registry Writer (roles/artifactregistry.writer)
+
 GUI method for creating repository:
 
 * Artifact Registry-->Create repository-->Name-->Format(Docker)-->Location type-->Clean Up Policy-->Add necessary things and create.
@@ -43,7 +46,7 @@ Authenticating 'Artifact registry':
 * gcloud auth configure-docker us-east1-docker.pkg.dev
 
 Building image:
-*docker build -t region.docker.pkg.dev/project-id/repository_name/image_name:version .
+*docker build -t region-docker.pkg.dev/project-id/repository_name/image_name:version .
 
 Ex:
 docker build -t us-east1-docker.pkg.dev/ringed-hallway-417305/sample/img:v1 .
@@ -52,7 +55,7 @@ Conforming image creation:
 * docker images
 
 Pushing image to repository:
-*docker push region.docker.pkg.dev/project-id/repository_name/image_name:version
+*docker push region-docker.pkg.dev/project-id/repository_name/image_name:version
 
 Ex:
 docker push us-east1-docker.pkg.dev/ringed-hallway-417305/sample/img:v1
