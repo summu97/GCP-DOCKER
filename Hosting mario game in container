@@ -1,0 +1,22 @@
+Roles:
+Pull images: Artifact Registry Reader (roles/artifactregistry.reader)
+Tag and push images: Artifact Registry Writer (roles/artifactregistry.writer)
+
+----------
+Dockerfile:
+
+FROM pengbai/docker-supermario
+EXPOSE 8080
+----------
+
+List repositories:
+gcloud artifacts repositories list
+
+Authenticating repository:
+gcloud auth configure-docker us-east1-docker.pkg.dev
+
+Building image:
+docker build -t us-east1-docker.pkg.dev/ringed-hallway-417305/practise/sumanth:v1 .
+
+Pushing to repository:
+docker push us-east1-docker.pkg.dev/ringed-hallway-417305/practise/sumanth:v1
