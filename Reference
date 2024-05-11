@@ -1,0 +1,199 @@
+FROM ubuntu
+RUN apt-get update
+RUN apt-get install -y ca-certificates curl gnupg
+RUN mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN apt-get update
+RUN apt-get install nodejs -y
+-----------------------------------
+ADD https://github.com/summu97/react.js.git /root
+-----------------------------------
+FROM ubuntu
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg
+
+# Set up Node.js repository key
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+# Set up Node.js repository
+ENV NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+# Update package lists from newly added repos
+RUN apt-get update
+
+# Install Node.js
+RUN apt-get install nodejs -y
+-----------------------------------
+cd new-react-app
+npm install
+npm run build
+apt install nginx -y
+cp -r build/* /var/www/html
+-----------------------------------
+FROM ubuntu
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    git
+
+# Set up Node.js repository key
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+# Set up Node.js repository
+ENV NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+# Update package lists from newly added repos
+RUN apt-get update
+
+# Install Node.js
+RUN apt-get install nodejs -y
+
+# Clone the repository into a temporary directory
+RUN git clone https://github.com/summu97/react.js.git /tmp/react_repo
+
+# Set working directory to the cloned repository
+WORKDIR /tmp/react_repo
+
+RUN npm install
+
+RUN npm run build
+
+-----------------------------------
+FROM ubuntu
+
+# Install git
+RUN apt-get update && apt-get install -y git
+
+# Clone the repository into a temporary directory
+RUN git clone https://github.com/summu97/react.js.git /tmp/react_repo
+
+# Copy the repository content into the desired location in the image
+RUN cp -r /tmp/react_repo/* /desired/location/in/image
+
+# Clean up
+RUN rm -rf /tmp/react_repo
+
+# Continue with the rest of your Dockerfile...
+--------------------------------------
+####################
+# FIRST STAGE
+####################
+
+FROM ubuntu AS build-stage
+
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    git
+
+# Set up Node.js repository key
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+# Set up Node.js repository
+ENV NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+# Update package lists from newly added repos
+RUN apt-get update
+
+# Install Node.js
+RUN apt-get install nodejs -y
+
+# Clone the repository into a temporary directory
+RUN git clone https://github.com/summu97/react.js.git /tmp/react_repo
+
+# Set working directory to the cloned repository
+WORKDIR /tmp/react_repo
+
+RUN npm install
+
+RUN npm run build
+
+##################
+# SECOND STAGE
+##################
+
+FROM nginx:latest AS running-stage
+
+WORKDIR /tmp/react_repo
+
+COPY --from=build-stage /tmp/react_repo/build/* /var/www/html/
+
+----------------
+cd new-react-app
+npm install
+npm run build
+apt install nginx -y
+cp -r build/* /var/www/html
+----------------
+####################
+# FIRST STAGE
+####################
+
+FROM ubuntu AS build-stage
+
+# Install required packages and clean up
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    git && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set up Node.js repository key
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+# Set up Node.js repository
+ENV NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+# Update package lists from newly added repos
+RUN apt-get update
+
+# Install Node.js and Git
+RUN apt-get install -y nodejs git
+
+# Clone the repository into a temporary directory
+RUN git clone https://github.com/summu97/react.js.git /tmp/react_repo
+
+# Set working directory to the cloned repository
+WORKDIR /tmp/react_repo
+
+# Install dependencies and build
+RUN npm install && \
+    npm run build
+
+##################
+# SECOND STAGE
+##################
+
+FROM nginx:latest AS running-stage
+
+# Remove all content from the Nginx HTML directory
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy the built files from the first stage to Nginx's HTML directory
+COPY --from=build-stage /tmp/react_repo/build/* /usr/share/nginx/html/
