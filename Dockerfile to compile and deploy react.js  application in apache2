@@ -46,3 +46,7 @@ RUN rm /usr/local/apache2/htdocs/index.html
 
 # Copy static files from build stage to Apache's HTML directory
 COPY --from=build-stage /tmp/react_repo/build /usr/local/apache2/htdocs
+-----------------------
+To build image and run container on port 8080:
+docker build -t img:v1 .
+docker run -itd --name cont1 -p 8080:80 img:v1
