@@ -1,0 +1,50 @@
+* plugin: Google Cloud Storage
+
+* Adding service account json key as Credentials:
+Dashboard-->Manage Jenkins-->Credentials-->Global-->Add Credentials-->Kind(Google Service Account from private key)-->ID(give it)-->Description(give it)-->Project Name(give your project id)-->JSON key-->JSON key File-->Choose file(select the json file)-->Create
+
+* Run these commands in terminal"
+sudo chmod 777 /var/run/docker.sock
+sudo systemctl daemon-reload
+sudo systemctl restart docker.service
+
+PIPELINE ODE EXPLAINED:
+* STAGE1: Checkout.
+* STAGE2: Building image.
+* STAGE3: Deleting all ".tar" files.
+* STAGE4: Converting image to ".tar" file.
+* Pushing to bucket:
+For Pipeline syntax: Sample Step(googleStorageUpload:Google Storage Classic Upload)-->File Pattern(image*.tar)-->Storage Location(Give storage bucket name)-->Generate Pipeline and use in pipeline code
+
+--------------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/summu97/GCP-DOCKER.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t img:v${BUILD_NUMBER} .'
+            }
+        }
+        stage('delete all.tar files') {
+            steps {
+                sh 'rm -rf *.tar'
+            }
+        }
+        stage('image to tar') {
+            steps {
+                sh 'docker save -o image${BUILD_NUMBER}.tar img:v${BUILD_NUMBER}'
+            }
+        }
+        stage('pushing to bucket') {
+            steps {
+                googleStorageUpload bucket: 'gs://adq-bucket-getteam/', credentialsId: 'json-key', pattern: 'image*.tar'
+            }
+        }
+    }
+}
