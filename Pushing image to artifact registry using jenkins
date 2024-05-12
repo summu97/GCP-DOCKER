@@ -1,0 +1,28 @@
+Pre-requesites: Create repository in Artifact registry.
+----------------------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/summu97/GCP-DOCKER.git'
+            }
+        }
+        stage('configuring') {
+            steps {
+                sh 'gcloud auth configure-docker us-central1-docker.pkg.dev' // Change region
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/img:v${BUILD_NUMBER} .' // Chabge region and my-docker-repo with your repository
+            }
+        }
+        stage('pushing image to registry') {
+            steps {
+                sh 'docker push us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/img:v${BUILD_NUMBER}' // Chabge region and my-docker-repo with your repository
+            }
+        }
+    }
+}
