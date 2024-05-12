@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Pulling image') {
+            steps {
+                sh 'docker pull us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/img:v4' // Change region, repository, image 
+            }
+        }
+        stage('tagging image to small name') {
+            steps {
+                sh 'docker tag us-central1-docker.pkg.dev/ringed-hallway-417305/my-docker-repo/img:v4 image:v4' // Here we are converting image name from big name to small name
+            }
+        }
+        stage('Deploying container') {
+            steps {
+                sh 'docker run -itd --name container1 -p 8081:80 image:v4'
+            }
+        }
+    }
+}
