@@ -193,6 +193,41 @@ RUN npm install && \
 FROM nginx:latest AS running-stage
 
 # Remove all content from the Nginx HTML directory
+---------------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/summu97/GCP-DOCKER.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t img:v${BUILD_NUMBER} .'
+            }
+        }
+        stage('delete all.tar files') {
+            steps {
+                sh 'rm -rf *.tar'
+            }
+        }
+        stage('image to tar') {
+            steps {
+                sh 'docker save -o image${BUILD_NUMBER}.tar img:v${BUILD_NUMBER}'
+                sh 'ls -l' // List files in the workspace directory
+                stash name: 'dockerImage', includes: 'image*.tar'
+            }
+        }
+        stage('pushing to bucket') {
+            steps {
+                unstash 'dockerImage'
+                googleStorageUpload bucket: 'gs://adq-bucket-getteam/', credentialsId: 'json-key', pattern: 'image*.tar'
+            }
+        }
+    }
+}
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy the built files from the first stage to Nginx's HTML directory
