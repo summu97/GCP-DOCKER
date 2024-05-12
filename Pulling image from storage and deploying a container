@@ -1,0 +1,29 @@
+* STAGE1: Download war from storage bucket.
+For Pipeline syntax: Sample Step(googleStorageDownload:Google Storage Download)-->Object to download(gs://adq-bucket-getteam/image14.tar)-->Local Directory(.)-->Generate Pipeline Script
+
+* STAGE2: Untaring the image.
+
+* STAGE3: Deploying a container with image
+NOTE: For credentials follow "Storing image to gcs" and also follow steps to authenticate docker.
+-------------
+pipeline {
+    agent any
+    
+    stages {
+        stage('Download image from storage') {
+            steps {
+                googleStorageDownload bucketUri: 'gs://adq-bucket-getteam/image14.tar', credentialsId: 'json-key', localDirectory: '.'
+            }
+        }
+        stage('Untar image') {
+            steps {
+                sh 'docker load -i image14.tar'
+            }
+        }
+        stage('Deploying container') {
+            steps {
+                sh 'docker run -itd --name container1 -p 8081:80 img:v14'
+            }
+        }
+    }
+}
