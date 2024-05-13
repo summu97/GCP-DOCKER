@@ -1,0 +1,19 @@
+BuildKit is a new, more modern build backend for Docker.
+
+1. Install Docker 19.03 or Later: 
+2. Enable Docker Experimental Features (Optional):
+	vim /etc/docker/daemon.json
+	"experimental": true 
+3. Ensure Docker is Installed: 
+	docker --version
+4. Install Buildx: 
+	docker buildx install
+5. Set Buildx as the Default Builder (Optional):
+	docker buildx use default
+6. Initialize Buildx: 
+	docker buildx create --use
+7. Prepare your Dockerfile:
+8. Build the Image:
+	docker buildx build -t your_image_name:tag .
+9. View Built Images: 
+	docker images
