@@ -26,20 +26,20 @@ WORKDIR /maven
 RUN mvn clean package
 
 # Download and extract Apache Tomcat
-ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.88/bin/apache-tomcat-9.0.88.tar.gz .
-RUN tar -zxvf apache-tomcat-9.0.88.tar.gz && \
-    rm apache-tomcat-9.0.88.tar.gz
+ADD https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.tar.gz .
+RUN tar -zxvf apache-tomcat-9.0.89.tar.gz && \
+    rm apache-tomcat-9.0.89.tar.gz
 
 # Configure Tomcat users
-RUN sed -i '56 a\<role rolename="manager-gui"/>' apache-tomcat-9.0.88/conf/tomcat-users.xml && \
-    sed -i '57 a\<role rolename="manager-script"/>' apache-tomcat-9.0.88/conf/tomcat-users.xml && \
-    sed -i '58 a\<user username="tomcat" password="tomcat" roles="manager-gui, manager-script"/>' apache-tomcat-9.0.88/conf/tomcat-users.xml && \
-    sed -i '59 a\</tomcat-users>' apache-tomcat-9.0.88/conf/tomcat-users.xml && \
-    sed -i '56d' apache-tomcat-9.0.88/conf/tomcat-users.xml && \
-    sed -i '21d' apache-tomcat-9.0.88/webapps/manager/META-INF/context.xml && \
-    sed -i '22d' apache-tomcat-9.0.88/webapps/manager/META-INF/context.xml
+RUN sed -i '56 a\<role rolename="manager-gui"/>' apache-tomcat-9.0.89/conf/tomcat-users.xml && \
+    sed -i '57 a\<role rolename="manager-script"/>' apache-tomcat-9.0.89/conf/tomcat-users.xml && \
+    sed -i '58 a\<user username="tomcat" password="tomcat" roles="manager-gui, manager-script"/>' apache-tomcat-9.0.89/conf/tomcat-users.xml && \
+    sed -i '59 a\</tomcat-users>' apache-tomcat-9.0.89/conf/tomcat-users.xml && \
+    sed -i '56d' apache-tomcat-9.0.89/conf/tomcat-users.xml && \
+    sed -i '21d' apache-tomcat-9.0.89/webapps/manager/META-INF/context.xml && \
+    sed -i '22d' apache-tomcat-9.0.89/webapps/manager/META-INF/context.xml
 
-RUN cp /maven/target/*.war /maven/apache-tomcat-9.0.88/webapps
+RUN cp /maven/target/*.war /maven/apache-tomcat-9.0.89/webapps
 
-RUN mv /maven/apache-tomcat-9.0.88 /usr/local/
-ENTRYPOINT ["/usr/local/apache-tomcat-9.0.88/bin/catalina.sh", "run"]
+RUN mv /maven/apache-tomcat-9.0.89 /usr/local/
+ENTRYPOINT ["/usr/local/apache-tomcat-9.0.89/bin/catalina.sh", "run"]
