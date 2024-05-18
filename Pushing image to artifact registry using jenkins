@@ -26,3 +26,69 @@ pipeline {
         }
     }
 }
+----------------------------------------------
+Also follow below as references:
+----------------------------------------------
+pipeline {
+    agent any
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('private') // Jenkins secret ID for GCP service account key
+    }
+ 
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/summu97/GCP-DOCKER.git'
+            }
+        }
+        stage('configuring') {
+            steps {
+                sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                sh 'gcloud auth configure-docker us-central1-docker.pkg.dev' // Change region
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t us-central1-docker.pkg.dev/genial-venture-414704/nodejs/img:v${BUILD_NUMBER} .' // Chabge region and my-docker-repo with your repository
+            }
+        }
+        stage('pushing image to registry') {
+            steps {
+                sh 'docker push us-central1-docker.pkg.dev/genial-venture-414704/nodejs/img:v${BUILD_NUMBER}' // Chabge region and my-docker-repo with your repository
+            }
+        }
+    }
+}
+-------------------------------------------
+pipeline {
+    agent any
+       environment { 
+         MY_PASSWORD = credentials('redhat')
+         GOOGLE_APPLICATION_CREDENTIALS = credentials('private') // Jenkins secret ID for GCP service account key
+ 
+     }
+ 
+    stages {
+        stage('configure') {
+            steps {
+                sh'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                sh'gcloud auth configure-docker us-central1-docker.pkg.dev'
+            }
+        }
+        // stage('copy Dockerfile'){
+        //     steps{
+        //         sh 'echo $MY_PASSWORD | sudo -S  mv /root/tomcat/Dockerfile .'
+        //     }
+        // }
+        stage('build'){
+            steps{
+                sh 'docker build -t us-central1-docker.pkg.dev/genial-venture-414704/nodejs/img:v${BUILD_NUMBER} .'
+            }
+        }
+        stage('pushing image to registry'){
+            steps{
+            sh 'docker push us-central1-docker.pkg.dev/genial-venture-414704/nodejs/img:v${BUILD_NUMBER}'    
+            }
+        }
+    }
+}
